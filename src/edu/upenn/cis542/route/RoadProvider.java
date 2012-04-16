@@ -14,9 +14,17 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class RoadProvider {
+	public enum Mode {
+		DRIVING,
+		WALKING,
+		BICYCLING                  //only available in US now
+	}
+
+	private static Mode mode;
 
         public static Road getRoute(InputStream is) {
                 KMLHandler handler = new KMLHandler();
+                
                 try {
                         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
                         parser.parse(is, handler);
@@ -31,7 +39,8 @@ public class RoadProvider {
         }
 
         public static String getUrl(double fromLat, double fromLon, double toLat,
-                        double toLon) {// connect to map web service
+                        double toLon, Mode mode2) {// connect to map web service
+        	 	mode = mode2;						//specify travel mode
                 StringBuffer urlString = new StringBuffer();
                 urlString.append("http://maps.google.com/maps?f=d&hl=en");
                 urlString.append("&saddr=");// from
@@ -43,6 +52,12 @@ public class RoadProvider {
                 urlString.append(",");
                 urlString.append(Double.toString(toLon));
                 urlString.append("&ie=UTF8&0&om=0&output=kml");
+                if (mode == Mode.WALKING) {
+    				urlString.append("&dirflg=w");
+    			}
+                else if(mode==Mode.BICYCLING){
+                	urlString.append("&dirflg=b");
+                }
                 return urlString.toString();
         }
 }

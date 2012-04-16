@@ -11,13 +11,10 @@ import java.util.List;
 import edu.upenn.cis542.route.Road;
 import edu.upenn.cis542.route.RoadProvider;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -41,7 +38,9 @@ public class MapRouteActivity extends MapActivity {
         Drawable s_marker;
         Drawable d_marker;
         Drawable i_marker;
-       
+        
+        /*Params that need to be passed from main program*/
+        RoadProvider.Mode mode = RoadProvider.Mode.BICYCLING;
         double fromLat = 39.952881, fromLon = -75.209437, toLat = 39.952759, toLon = -75.192776;
 
         @Override
@@ -60,7 +59,7 @@ public class MapRouteActivity extends MapActivity {
                         public void run() {
                                 
                                 String url = RoadProvider
-                                                .getUrl(fromLat, fromLon, toLat, toLon);
+                                                .getUrl(fromLat, fromLon, toLat, toLon,mode);
                                 InputStream is = getConnection(url);
                                 mRoad = RoadProvider.getRoute(is);
                                 mHandler.sendEmptyMessage(0);
