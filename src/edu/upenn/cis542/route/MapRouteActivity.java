@@ -34,14 +34,17 @@ public class MapRouteActivity extends MapActivity {
 
         LinearLayout linearLayout;
         MapView mapView;
+        private String   i_type;
         private Road mRoad;
         Drawable s_marker;
         Drawable d_marker;
         Drawable i_marker;
         
         /*Params that need to be passed from main program*/
-        RoadProvider.Mode mode = RoadProvider.Mode.BICYCLING;
-        double fromLat = 39.952881, fromLon = -75.209437, toLat = 39.952759, toLon = -75.192776;
+        
+      
+        RoadProvider.Mode mode;
+        double fromLat, fromLon, toLat, toLon;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,12 @@ public class MapRouteActivity extends MapActivity {
                 i_marker = getResources().getDrawable(R.drawable.heart);
                 mapView.setBuiltInZoomControls(true);
                 
+                fromLat = 39.952881;
+                fromLon = -75.209437;
+                toLat = 39.952759;
+                toLon = -75.192776;
+                mode = RoadProvider.Mode.BICYCLING;
+                i_type = "bar";
                 
                 new Thread() {
                         @Override
@@ -65,6 +74,14 @@ public class MapRouteActivity extends MapActivity {
                                 mHandler.sendEmptyMessage(0);
                         }
                 }.start();
+                
+                SearchPlaces search = new SearchPlaces();
+        		PlacesList list = search.getNearByPlaces(fromLat, fromLon, i_type);
+        		Log.v("SearchPlaces", String.valueOf(list.results.size()));
+        		for(int i = 0; i < list.results.size(); i++)
+        		{
+        			Log.v("SearchPlaces", list.results.get(i).toString());
+        		}
         }
 
         Handler mHandler = new Handler() {
@@ -183,4 +200,9 @@ class MapOverlay extends com.google.android.maps.Overlay {
                         y1 = y2;
                 }
         }
+		
+		public boolean onTap(GeoPoint p, MapView mapView)
+		{
+			return false;
+		}
 }
