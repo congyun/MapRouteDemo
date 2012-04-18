@@ -120,11 +120,12 @@ public class SearchPlaces {
      return urlString.toString();
 	}
 	
-	/*Testing main method, need to execute outside Android project. e.g., build a new Java project to run main*/
+	/*Testing main method*/
 	public static void main(String [] args)
 	{
 		SearchPlaces search = new SearchPlaces();
 		PlacesList list = search.getNearByPlaces(39.952881, -75.209437, "bar");
+		System.out.println("Getting nearby places ended. result size = "+list.results.size());
 		for(int i = 0; i < list.results.size(); i++)
 		{
 			System.out.println("In main: "+list.results.get(i).toString());
@@ -151,7 +152,7 @@ class XMLHandler extends DefaultHandler{
 	        super.startDocument();
 	        mPlacesList = new PlacesList();
 	        builder = new StringBuilder();
-
+	        System.out.println("Start Document...");
 	    }
 
 	 @Override
@@ -165,7 +166,7 @@ class XMLHandler extends DefaultHandler{
 	        }
 	    }
 	 @Override
-	 	//TODO: get nested xml elements value. e.g.: lat and lon tag
+	 	
 	    public void endElement(String uri, String localName, String name)
 	            throws SAXException {
 	        super.endElement(uri, localName, name);
@@ -180,8 +181,13 @@ class XMLHandler extends DefaultHandler{
 	            	currentPlace.setRating(builder.toString());
 	            } else if(name.equalsIgnoreCase("reference")){
 	            	currentPlace.setReference(builder.toString());
+	            }else if(name.equalsIgnoreCase("lat")){
+	            	currentPlace.setLatitude(builder.toString());
+	            }else if(name.equalsIgnoreCase("lng")){
+	            	currentPlace.setLontitude(builder.toString());
 	            }else if (name.equalsIgnoreCase("result")){
 	            	mPlacesList.add(currentPlace);
+	            	System.out.println(currentPlace.name+" added");
 	            }
 	            builder.setLength(0);    
 	        }

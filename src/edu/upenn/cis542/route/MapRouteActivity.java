@@ -29,6 +29,7 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
 public class MapRouteActivity extends MapActivity {
 
@@ -36,6 +37,7 @@ public class MapRouteActivity extends MapActivity {
         MapView mapView;
         private String   i_type;
         private Road mRoad;
+        private PlacesList mList;
         Drawable s_marker;
         Drawable d_marker;
         Drawable i_marker;
@@ -51,18 +53,20 @@ public class MapRouteActivity extends MapActivity {
                 super.onCreate(savedInstanceState);
                 setContentView(R.layout.main);
                 mapView = (MapView) findViewById(R.id.mapview);
-                s_marker = getResources().getDrawable(R.drawable.marker);
-                d_marker = getResources().getDrawable(R.drawable.marker);
+                s_marker = getResources().getDrawable(R.drawable.marker_a);
+                d_marker = getResources().getDrawable(R.drawable.marker_b);
                 i_marker = getResources().getDrawable(R.drawable.heart);
                 mapView.setBuiltInZoomControls(true);
+               
                 
                 fromLat = 39.952881;
                 fromLon = -75.209437;
                 toLat = 39.952759;
                 toLon = -75.192776;
                 mode = RoadProvider.Mode.BICYCLING;
-                i_type = "bar";
-                
+                i_type = "food";
+ 
+              
                 new Thread() {
                         @Override
                         public void run() {
@@ -76,11 +80,11 @@ public class MapRouteActivity extends MapActivity {
                 }.start();
                 
                 SearchPlaces search = new SearchPlaces();
-        		PlacesList list = search.getNearByPlaces(fromLat, fromLon, i_type);
-        		Log.v("SearchPlaces", String.valueOf(list.results.size()));
-        		for(int i = 0; i < list.results.size(); i++)
+                mList = search.getNearByPlaces(fromLat, fromLon, i_type);
+        		Log.v("SearchPlaces", String.valueOf(mList.results.size()));
+        		for(int i = 0; i < mList.results.size(); i++)
         		{
-        			Log.v("SearchPlaces", list.results.get(i).toString());
+        			Log.v("SearchPlaces", mList.results.get(i).toString());
         		}
         }
 
@@ -88,7 +92,7 @@ public class MapRouteActivity extends MapActivity {
                 public void handleMessage(android.os.Message msg) {
                         TextView textView = (TextView) findViewById(R.id.description);
                         textView.setText(mRoad.mName + " " + mRoad.mDescription);
-                        MapOverlay mapOverlay = new MapOverlay(mRoad, mapView, s_marker,d_marker, i_marker, fromLat, fromLon, toLat,toLon);
+                        MapOverlay mapOverlay = new MapOverlay(mRoad, mList,mapView, s_marker,d_marker, i_marker, fromLat, fromLon, toLat,toLon);
                         List<Overlay> listOfOverlays = mapView.getOverlays();
                         listOfOverlays.clear();
                         listOfOverlays.add(mapOverlay);
@@ -117,6 +121,7 @@ public class MapRouteActivity extends MapActivity {
 
 class MapOverlay extends com.google.android.maps.Overlay {
         Road mRoad;
+        PlacesList mList;
         ArrayList<GeoPoint> mPoints;
         Drawable sMarker;
         Drawable dMarker;
@@ -126,8 +131,9 @@ class MapOverlay extends com.google.android.maps.Overlay {
         double m_toLat;
         double m_toLon;
 
-        public MapOverlay(Road road, MapView mv, Drawable s_marker, Drawable d_marker, Drawable i_marker, double fromLat, double fromLon, double toLat, double toLon) {
+        public MapOverlay(Road road, PlacesList list, MapView mv, Drawable s_marker, Drawable d_marker, Drawable i_marker, double fromLat, double fromLon, double toLat, double toLon) {
                 mRoad = road;
+                mList = list;
                 sMarker = s_marker;
                 dMarker = d_marker;
                 iMarker = i_marker;
@@ -165,20 +171,35 @@ class MapOverlay extends com.google.android.maps.Overlay {
         }
 
         private void drawMarker(MapView mv, Canvas canvas) {
+        	/*draw route markers */
         	 GeoPoint s_p = new GeoPoint( (int) (m_fromLat * 1E6), (int) (m_fromLon * 1E6));
         	 Point s_screenPts = new Point();
              mv.getProjection().toPixels(s_p, s_screenPts);
-             sMarker.setBounds(s_screenPts.x-20, s_screenPts.y-20, s_screenPts.x+20, s_screenPts.y+20);
-             dMarker.setColorFilter(Color.YELLOW, Mode.MULTIPLY);
+             sMarker.setBounds(s_screenPts.x-10, s_screenPts.y-10, s_screenPts.x+10, s_screenPts.y+10);
              sMarker.draw(canvas);
         	// Log.v("DrawMarker", m_toLat+ " "+m_toLon);
              GeoPoint d_p = new GeoPoint( (int) (m_toLat * 1E6), (int) (m_toLon * 1E6));
             // Log.v("DrawMarker", d_p.getLatitudeE6()+ " "+d_p.getLongitudeE6());
         	 Point d_screenPts = new Point();
              mv.getProjection().toPixels(d_p, d_screenPts);
-             dMarker.setBounds(d_screenPts.x-20, d_screenPts.y-20, d_screenPts.x+20, d_screenPts.y+20);
-             dMarker.setColorFilter(Color.RED, Mode.MULTIPLY);
-             dMarker.draw(canvas);            
+             dMarker.setBounds(d_screenPts.x-10, d_screenPts.y-10, d_screenPts.x+10, d_screenPts.y+10);
+            
+             dMarker.draw(canvas);         
+             
+             /*draw points of interest markers*/
+             ArrayList<GeoPoint> i_plist = new ArrayList<GeoPoint>();
+             for(int i = 0; i < mList.results.size(); i++)
+             {
+            	 GeoPoint i_p = new GeoPoint( (int) (mList.results.get(i).latitude * 1E6), (int) (mList.results.get(i).longtitude * 1E6));
+            	 Point i_screenPts = new Point();
+                 mv.getProjection().toPixels(i_p, i_screenPts);
+                 iMarker.setBounds(i_screenPts.x-10, i_screenPts.y-10, i_screenPts.x+10, i_screenPts.y+10);
+                 iMarker.draw(canvas);     
+                 
+       
+             }
+             
+             
                 
 		}
 
@@ -201,8 +222,34 @@ class MapOverlay extends com.google.android.maps.Overlay {
                 }
         }
 		
+		/*Response when tap a marker on screen*/
 		public boolean onTap(GeoPoint p, MapView mapView)
 		{
+	 
+			String i_name = null;
+			String i_vicinity = null;
+			double i_rating;
+			
+			for(int i = 0; i < mList.results.size()-3; i++)
+            {
+				GeoPoint dp = new GeoPoint((int) (mList.results.get(i).latitude *1E6), (int)(mList.results.get(i).longtitude *1E6));
+				if(dp.equals(p))
+				{
+					System.out.println("hit!");
+					i_name = mList.results.get(i).name;
+					i_vicinity = mList.results.get(i).vicinity;
+					i_rating = mList.results.get(i).rating;
+					
+					SimpleItemizedOverlay itemizedOverlay;
+		            itemizedOverlay = new SimpleItemizedOverlay(iMarker, mapView);
+		      		OverlayItem overlayItem = new OverlayItem(p, i_name, i_vicinity); 
+		      		itemizedOverlay.addOverlay(overlayItem);
+		      		List<Overlay> listOfOverlays = mapView.getOverlays();
+		      		listOfOverlays.add(itemizedOverlay);
+		      		mapView.invalidate();
+				}
+            }
+			 
 			return false;
 		}
 }

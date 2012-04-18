@@ -13,7 +13,7 @@ public class Place {
 	 public String vicinity;
 	 public ArrayList<String> type;                   //can have multiple types
 	 double latitude;
-     double longitude;
+     double longtitude;
 	
 	 public Place()
 	 {
@@ -21,7 +21,7 @@ public class Place {
 	 }
 	 @Override
 	 public String toString() {
-	  return name + " - " + type.get(0)+ " - " +vicinity;
+	  return name + " - " + type.get(0)+ " - " +vicinity + " - "+latitude+" "+longtitude;
 	 }
 	public void setName(String string) {
 		this.name = string;
@@ -48,7 +48,7 @@ public class Place {
 	}
 	
 	public void setLontitude(String string){
-		this.longitude = Double.valueOf(string);
+		this.longtitude = Double.valueOf(string);
 	}
 	  
 }
